@@ -17,7 +17,6 @@ import server_code as sc
 
 import numbers
 
-
 class CustomNotebook(ttk.Notebook):
     """A ttk Notebook with close buttons on each tab"""
     notebook_id = 0
@@ -185,6 +184,8 @@ class FramedNotebook(CustomNotebook):
         if isCommon:
             self.listbox = tk.Listbox(self.labelFrame, width = 40, height = 13)
             self.listbox.place(relx = 0.5, rely = 0.5, anchor = tk.CENTER)
+            # TODO: Change the function so as to open the browser page of the object.
+            self.listbox.bind('<Double-Button-1>', lambda _ : print("Do nothing"))
             printHighlightsListbox(data, self.listbox)
         
         else:
@@ -197,11 +198,13 @@ class FramedNotebook(CustomNotebook):
                     tab = Tab(self, "%s" % data[0])
                 else:
                     tab = Tab(self, "%s, %s" % (data[1], data[0]))  
-           
+
                 self.tabies.append(tab)
     
                 self.listbox = tk.Listbox(tab.frame, width = 40, height = 13)
                 self.listbox.place(relx = 0.5, rely = 0.5, anchor = tk.CENTER)
+                # TODO: Change the function so as to open the browser page of the object.
+                self.listbox.bind('<Double-Button-1>', lambda _ : print("Do nothing"))
                 
                 printHighlightsListbox(data[4], self.listbox)
 
