@@ -32,7 +32,7 @@ def server_init(label):
         auth = twitter.oauth.OAuth(data[2], data[3], data[0], data[1])
         twitter_api = twitter.Twitter(auth=auth)
         label.config(text = "Connection status: connection success!")
-    
+
     except:
         label.config(text = "Connection status: connection failure...")
 
@@ -43,7 +43,7 @@ analysis_data = [[]]
 
 def doNothing():
     print("Ok ok I wont...")
-    
+
 def quitProgram(root):
     root.quit()
     root.destroy()

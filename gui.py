@@ -15,8 +15,8 @@ def on_tab_selected(event):
 
     if tab_text == "All Records":
         print("All Records tab selected")
-    
-    if tab_text == "Add New Record":    
+
+    if tab_text == "Add New Record":
         print("Add New Record tab selected")
 
 form = tk.Tk()

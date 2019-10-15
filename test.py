@@ -18,9 +18,9 @@ def getIndex(listbox):
     items = []
     for i in listbox.curselection():
         items.append(listbox.get(i))
-    
+
     print(items)
-   
+
 
 
 root = tk.Tk()

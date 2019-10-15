@@ -43,7 +43,7 @@ for i in range(0, len(woeid_list)):
     if woeid_list[i]['country'] in sorted_list:
         sorted_list[woeid_list[i]['country']]['cities'].update(
                 {woeid_list[i]['name']: {
-                            "woeid": woeid_list[i]['woeid']                
+                            "woeid": woeid_list[i]['woeid']
                             }})
 
 errored_elements = [];
@@ -55,7 +55,7 @@ for i in range(0, len(woeid_list)):
                 checked_entry_counter+= 1
             else:
                 errored_elements.append(i)
-                
+
 
 woeid_copy = copy.deepcopy(woeid)
 woeid_copy2 = copy.deepcopy(woeid)
@@ -65,7 +65,7 @@ for key in sorted(woeid_copy.keys()):
     test.update({key: woeid_copy[key]})
 
 for key in test.keys():
-    test[key]['cities'] = {} 
+    test[key]['cities'] = {}
 
 for key in sorted(woeid_copy2.keys()):
     for anotherKey in sorted(woeid_copy2[key]['cities']):
