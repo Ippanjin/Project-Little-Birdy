@@ -18,6 +18,7 @@ import server_code as sc
 import numbers
 
 import webbrowser as browser
+from tabulate import tabulate
 
 # Opens the browser page of the clicked item in a listbox.
 def openLink(event, data):
@@ -220,6 +221,13 @@ class FramedNotebook(CustomNotebook):
 
 
 def printHighlightsListbox(data, listbox):
+    #'''
+    table = [[entry['name'], entry['tweet_volume'] or 'No data'] for entry in data]
+    table = tabulate(table, tablefmt="plain")
+    print(table)
+    for entry in table.split("\n"):
+        listbox.insert(tk.END, entry)
+    '''
     for i in range(0, len(data)):
         entry = ""
 
@@ -230,6 +238,7 @@ def printHighlightsListbox(data, listbox):
             entry += 'No data'
 
         listbox.insert(tk.END, entry)
+    '''
 
 class Entrybox:
 
