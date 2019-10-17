@@ -5,6 +5,13 @@ Created on Mon Jul 29 07:17:05 2019
 @author: Omar
 """
 import twitter
+
+try:
+    import os
+    os.chdir("D:\(PC)\Desktop\Coding\Python\Twitter prototype\github\Twitter-prototype")
+except:
+    pass
+
 import json
 from woeid import alphSorted_woeid_list as woeid_data
 import copy

@@ -17,6 +17,12 @@ import server_code as sc
 
 import numbers
 
+try:
+    import os
+    os.chdir("D:\(PC)\Desktop\Coding\Python\Twitter prototype\github\Twitter-prototype")
+except:
+    pass
+
 import webbrowser as browser
 
 # Opens the browser page of the clicked item in a listbox.
@@ -182,6 +188,7 @@ class FramedNotebook(CustomNotebook):
     def __init__(self, master, text = "", close_button = False, width = 200, height = 200, x = 0, y = 0, *args, **kwargs):
         self.labelFrame = tk.LabelFrame(master, text = text)
         self.labelFrame.place(x = x, y = y)
+        self.width, self.height = width, height
         self.name = text
         super().__init__(self.labelFrame, close_button = close_button, width = width, height = height, *args, **kwargs)
         self.printed = []
@@ -192,9 +199,13 @@ class FramedNotebook(CustomNotebook):
 
         isCommon = kwargs.get("common", False)
         if isCommon:
-            tab = Tab(self, '')
-            self.tabies.append(tab)
-            self.createTreeView(tab.frame, data)
+            for child in self.labelFrame.winfo_children():
+                child.destroy()
+            self.frame = tk.Frame(self.labelFrame, width = self.width, height = self.height)
+            self.frame.grid_propagate(0)
+            self.createTreeView(self.frame, data)
+            self.frame.pack()
+            
             '''
             self.listbox = tk.Listbox(self.labelFrame, width = 40, height = 13)
             self.listbox.place(relx = 0.5, rely = 0.5, anchor = tk.CENTER)
@@ -227,13 +238,17 @@ class FramedNotebook(CustomNotebook):
                 '''
 
     def createTreeView(self, frame, data):
+        if(frame.winfo_reqwidth() > 1):
+            width = frame.winfo_reqwidth()
+        else:
+            width = frame.winfo_width()
         self.tree = ttk.Treeview(columns=['tweet', 'volume'], show=[])
         self.tree.grid(column=0, row=0, sticky='nsew', in_=frame)
         frame.grid_columnconfigure(0, weight=1)
         frame.grid_rowconfigure(0, weight=1)
 
-        self.tree.column('tweet', width=30)
-        self.tree.column('volume', width=10)
+        self.tree.column('tweet', width=int(width*0.75))
+        self.tree.column('volume', width=int(width*0.23))
 
         self.tree.bind('<Double-Button-1>', lambda event : openLink(event, data))
 
