@@ -25,14 +25,6 @@ except:
 
 import webbrowser as browser
 
-# Opens the browser page of the clicked item in a listbox.
-def openLink(event, data):
-    # Get the index of the clicked item from the listbox.
-    index = event.widget.selection()[0]
-    index = event.widget.index(index)
-    # Open the relevant url by referring to the provided database.
-    browser.open(data[index]['url'])
-
 class CustomNotebook(ttk.Notebook):
     """A ttk Notebook with close buttons on each tab"""
     notebook_id = 0
@@ -205,7 +197,7 @@ class FramedNotebook(CustomNotebook):
                 child.destroy()
             self.frame = tk.Frame(self.labelFrame, width = self.width, height = self.height)
             self.frame.grid_propagate(0)
-            self.createTreeView(self.frame, data)
+            self.createTreeview(self.frame, data)
             self.frame.pack()
 
 
@@ -222,9 +214,9 @@ class FramedNotebook(CustomNotebook):
 
                 self.tabies.append(tab)
 
-                self.createTreeView(tab.frame, data[4])
+                self.createTreeview(tab.frame, data[4])
 
-    def createTreeView(self, frame, data):
+    def createTreeview(self, frame, data):
         if(frame.winfo_reqwidth() > 1):
             width = frame.winfo_reqwidth()
         else:
@@ -239,27 +231,22 @@ class FramedNotebook(CustomNotebook):
 
         self.tree.bind('<Double-Button-1>', lambda event : openLink(event, data))
 
-        printHighlightsListbox(data, self.tree)
+        populateTreeview(data, self.tree)
+
+# Opens the browser page of the clicked item in a treeview.
+def openLink(event, data):
+    # Get the index of the clicked item from the treeview.
+    item = event.widget.selection()[0]
+    index = event.widget.index(item)
+
+    browser.open(data[index]['url'])
 
 
 
-def printHighlightsListbox(data, listbox):
-    #'''
-    table = [[entry['name'], entry['tweet_volume'] or 'No data'] for entry in data]
-    for entry in table:
-        listbox.insert('', 'end', values=entry)
-    '''
-    for i in range(0, len(data)):
-        entry = ""
-
-        entry += "%s      "%data[i]['name']
-        if data[i]['tweet_volume'] is not None:
-            entry += "%d"%data[i]['tweet_volume']
-        else:
-            entry += 'No data'
-
-        listbox.insert(tk.END, entry)
-    '''
+def populateTreeview(data, treeview):
+    for entry in data:
+        entry = entry['name'], entry['tweet_volume'] or 'No data'
+        treeview.insert('', 'end', values=entry)
 
 class Entrybox:
 
