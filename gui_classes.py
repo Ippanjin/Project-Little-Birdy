@@ -186,22 +186,19 @@ class FramedNotebook(CustomNotebook):
         super().__init__(self.labelFrame, close_button = close_button, width = width, height = height, *args, **kwargs)
         self.printed = []
         self.tabies = []
+        self.tree = None
 
 
     def update(self, data, **kwargs):
 
         isCommon = kwargs.get("common", False)
         if isCommon:
-            tab = Tab(self, '')
-            self.tabies.append(tab)
-            self.createTreeView(tab.frame, data)
-            '''
-            self.listbox = tk.Listbox(self.labelFrame, width = 40, height = 13)
-            self.listbox.place(relx = 0.5, rely = 0.5, anchor = tk.CENTER)
-            # Open the relevant link when an item in the list is double clicked.
-            self.listbox.bind('<Double-Button-1>', lambda event : openLink(event, data))
-            printHighlightsListbox(data, self.listbox)
-            '''
+            if self.tree:
+                self.tree.delete(*self.tree.get_children())
+                printHighlightsListbox(data, self.tree)
+            else:
+                tab = Tab(self, '')
+                self.createTreeView(tab.frame, data)
 
         else:
             if data[2] in self.printed:
@@ -217,14 +214,6 @@ class FramedNotebook(CustomNotebook):
                 self.tabies.append(tab)
 
                 self.createTreeView(tab.frame, data[4])
-                '''
-                self.listbox = tk.Listbox(tab.frame, width = 40, height = 13)
-                self.listbox.place(relx = 0.5, rely = 0.5, anchor = tk.CENTER)
-                # Open the relevant link when an item in the list is double clicked.
-                self.listbox.bind('<Double-Button-1>', lambda event : openLink(event, data[4]))
-
-                printHighlightsListbox(data[4], self.listbox)
-                '''
 
     def createTreeView(self, frame, data):
         self.tree = ttk.Treeview(columns=['tweet', 'volume'], show=[])
