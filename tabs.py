@@ -6,11 +6,6 @@ Created on Tue Jul 30 12:39:06 2019
 """
 
 import sys
-try:
-    import os
-    os.chdir("D:\(PC)\Desktop\Coding\Python\Twitter prototype\github\Twitter-prototype")
-except:
-    pass
 import twitter
 import json
 from urllib.parse import unquote
