@@ -18,12 +18,12 @@ import server_code as sc
 import numbers
 
 import webbrowser as browser
-from tabulate import tabulate
 
 # Opens the browser page of the clicked item in a listbox.
 def openLink(event, data):
     # Get the index of the clicked item from the listbox.
-    index = event.widget.curselection()[0]
+    index = event.widget.selection()[0]
+    index = event.widget.index(index)
     # Open the relevant url by referring to the provided database.
     browser.open(data[index]['url'])
 
@@ -192,11 +192,16 @@ class FramedNotebook(CustomNotebook):
 
         isCommon = kwargs.get("common", False)
         if isCommon:
+            tab = Tab(self, '')
+            self.tabies.append(tab)
+            self.createTreeView(tab.frame, data)
+            '''
             self.listbox = tk.Listbox(self.labelFrame, width = 40, height = 13)
             self.listbox.place(relx = 0.5, rely = 0.5, anchor = tk.CENTER)
             # Open the relevant link when an item in the list is double clicked.
             self.listbox.bind('<Double-Button-1>', lambda event : openLink(event, data))
             printHighlightsListbox(data, self.listbox)
+            '''
 
         else:
             if data[2] in self.printed:
@@ -211,22 +216,36 @@ class FramedNotebook(CustomNotebook):
 
                 self.tabies.append(tab)
 
+                self.createTreeView(tab.frame, data[4])
+                '''
                 self.listbox = tk.Listbox(tab.frame, width = 40, height = 13)
                 self.listbox.place(relx = 0.5, rely = 0.5, anchor = tk.CENTER)
                 # Open the relevant link when an item in the list is double clicked.
                 self.listbox.bind('<Double-Button-1>', lambda event : openLink(event, data[4]))
 
                 printHighlightsListbox(data[4], self.listbox)
+                '''
+
+    def createTreeView(self, frame, data):
+        self.tree = ttk.Treeview(columns=['tweet', 'volume'], show=[])
+        self.tree.grid(column=0, row=0, sticky='nsew', in_=frame)
+        frame.grid_columnconfigure(0, weight=1)
+        frame.grid_rowconfigure(0, weight=1)
+
+        self.tree.column('tweet', width=30)
+        self.tree.column('volume', width=10)
+
+        self.tree.bind('<Double-Button-1>', lambda event : openLink(event, data))
+
+        printHighlightsListbox(data, self.tree)
 
 
 
 def printHighlightsListbox(data, listbox):
     #'''
     table = [[entry['name'], entry['tweet_volume'] or 'No data'] for entry in data]
-    table = tabulate(table, tablefmt="plain")
-    print(table)
-    for entry in table.split("\n"):
-        listbox.insert(tk.END, entry)
+    for entry in table:
+        listbox.insert('', 'end', values=entry)
     '''
     for i in range(0, len(data)):
         entry = ""
