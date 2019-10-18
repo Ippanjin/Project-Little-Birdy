@@ -224,7 +224,7 @@ class FramedNotebook(CustomNotebook):
             width = frame.winfo_reqwidth()
         else:
             width = frame.winfo_width()
-        fields = ['name', 'tweet_volume', 'url'] # If changed, make sure to update openLink().
+        fields = ['name', 'tweet_volume', 'url']
         self.tree = ttk.Treeview(columns=fields, displaycolumns=fields[:2], show=[])
         self.tree.grid(column=0, row=0, sticky='nsew', in_=frame)
         frame.grid_columnconfigure(0, weight=1)
@@ -233,14 +233,17 @@ class FramedNotebook(CustomNotebook):
         self.tree.column('name', width=int(width*0.75))
         self.tree.column('tweet_volume', width=int(width*0.23))
 
-        self.tree.bind('<Double-Button-1>', lambda event : openLink(event.widget, data))
+        self.tree.bind('<Double-Button-1>', lambda event : openLink(event.widget, fields))
 
         populateTreeview(data, self.tree)
 
 # Opens the browser page of the clicked item in a treeview.
-def openLink(w, data):
+# w here refers to the widget of the event, which here is the treeview element.
+def openLink(w, fields):
     values = w.item(w.selection()[0], values=None)
-    browser.open(values[2])
+    # The values are converted to a dictionary to automatically locate the url.
+    valuesdict = dict(zip(fields, values))
+    browser.open(valuesdict['url'])
 
 def populateTreeview(data, treeview):
     for entry in data:
