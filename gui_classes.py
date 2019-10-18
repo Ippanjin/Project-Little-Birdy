@@ -192,13 +192,16 @@ class FramedNotebook(CustomNotebook):
 
         isCommon = kwargs.get("common", False)
         if isCommon:
-
-            for child in self.labelFrame.winfo_children():
-                child.destroy()
-            self.frame = tk.Frame(self.labelFrame, width = self.width, height = self.height)
-            self.frame.grid_propagate(0)
-            self.createTreeview(self.frame, data)
-            self.frame.pack()
+            if self.tree:
+                self.tree.delete(*self.tree.get_children())
+                populateTreeview(data, self.tree)
+            else:
+                for child in self.labelFrame.winfo_children():
+                    child.destroy()
+                self.frame = tk.Frame(self.labelFrame, width = self.width, height = self.height)
+                self.frame.grid_propagate(0)
+                self.createTreeview(self.frame, data)
+                self.frame.pack()
 
 
         else:
@@ -221,32 +224,28 @@ class FramedNotebook(CustomNotebook):
             width = frame.winfo_reqwidth()
         else:
             width = frame.winfo_width()
-        self.tree = ttk.Treeview(columns=['tweet', 'volume'], show=[])
+        fields = ['name', 'tweet_volume', 'url'] # If changed, make sure to update openLink().
+        self.tree = ttk.Treeview(columns=fields, displaycolumns=fields[:2], show=[])
         self.tree.grid(column=0, row=0, sticky='nsew', in_=frame)
         frame.grid_columnconfigure(0, weight=1)
         frame.grid_rowconfigure(0, weight=1)
 
-        self.tree.column('tweet', width=int(width*0.75))
-        self.tree.column('volume', width=int(width*0.23))
+        self.tree.column('name', width=int(width*0.75))
+        self.tree.column('tweet_volume', width=int(width*0.23))
 
-        self.tree.bind('<Double-Button-1>', lambda event : openLink(event, data))
+        self.tree.bind('<Double-Button-1>', lambda event : openLink(event.widget, data))
 
         populateTreeview(data, self.tree)
 
 # Opens the browser page of the clicked item in a treeview.
-def openLink(event, data):
-    # Get the index of the clicked item from the treeview.
-    item = event.widget.selection()[0]
-    index = event.widget.index(item)
-
-    browser.open(data[index]['url'])
-
-
+def openLink(w, data):
+    values = w.item(w.selection()[0], values=None)
+    browser.open(values[2])
 
 def populateTreeview(data, treeview):
     for entry in data:
-        entry = entry['name'], entry['tweet_volume'] or 'No data'
-        treeview.insert('', 'end', values=entry)
+        values = entry['name'], entry['tweet_volume'] or 'No data', entry['url']
+        treeview.insert('', 'end', values=values)
 
 class Entrybox:
 
