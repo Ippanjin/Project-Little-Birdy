@@ -1,8 +1,11 @@
-bin/*
-build/*
-include/*
-lib/*
-__pycache__/*
+bin/
+build/
+include/
+lib/
+__pycache__/
 *.swp
 *.spec
 *.exe
+LICENSE.txt
+Scripts/
+tcl/
