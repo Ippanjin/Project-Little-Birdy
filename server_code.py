@@ -40,15 +40,13 @@ SENDAI_WOE_ID = woeid_data['Japan']['cities']['Sendai']['woeid']
 
 
 def nonesorter(a):
-    if not a:
-        return 0
-    return a
+    return a or 0
 
 
 def prepare_data(entries):
     woeids = []
-    for i in range(0, len(entries)):
-        woeids.append(entries[i][2])
+    for entry in entries:
+        woeids.append(entry[2])
 
     print(woeids)
     for i in range(0, len(woeids)):
@@ -67,11 +65,11 @@ def prepare_data(entries):
 
             temp_block = sorted(temp_block[0]['trends'], reverse = True, key = lambda i: nonesorter(i['tweet_volume']))
 
-            for j in range(0, len(temp_block)):
-                if temp_block[j]['name'][0] == '#':
-                    temp_hashtags.append(temp_block[j])
+            for temp in temp_block:
+                if temp['name'][0] == '#':
+                    temp_hashtags.append(temp)
                 else:
-                    temp_keywords.append(temp_block[j])
+                    temp_keywords.append(temp)
 
         entries[i].append([temp_hashtags, temp_keywords])
         entries[i][3] = "Loaded"
@@ -91,31 +89,31 @@ def prepare_one_data(entry):
 
     temp_block = sorted(temp_block[0]['trends'], reverse = True, key = lambda i: nonesorter(i['tweet_volume']))
 
-    for i in range(0, len(temp_block)):
-        if temp_block[i]['name'][0] == '#':
-            temp_hashtags.append(temp_block[i])
+    for temp in temp_block:
+        if temp['name'][0] == '#':
+            temp_hashtags.append(temp)
         else:
-            temp_keywords.append(temp_block[i])
+            temp_keywords.append(temp)
 
     data_block = [temp_hashtags, temp_keywords]
 
     return data_block
 
 def printHighlights(data):
-    for i in range(0, len(data)):
-        print(data[i]['name'], end ='\t')
-        if data[i]['tweet_volume'] != None or'tweet_volume' in data[i]:
-            print(data[i]['tweet_volume'])
+    for tweet in data:
+        print(tweet['name'], end ='\t')
+        if tweet['tweet_volume'] != None or'tweet_volume' in tweet:
+            print(tweet['tweet_volume'])
         else:
             print('No data')
 
 def printHighlightsListbox(data, listbox):
-    for i in range(0, len(data)):
+    for tweet in data:
         entry = ""
 
-        entry += data[i]['name'] + '\t'
-        if data[i]['tweet_volume'] != None or'tweet_volume' in data[i]:
-            entry += data[i]['tweet_volume']
+        entry += tweet['name'] + '\t'
+        if tweet['tweet_volume'] != None or'tweet_volume' in tweet:
+            entry += tweet['tweet_volume']
         else:
             entry += 'No data'
 
@@ -137,13 +135,13 @@ def get_common_data(data):
     common_sets = [list(common_sets[0]), list(common_sets[1])]
 
 
-    for i in range(0, len(data[0][0])):
-        if data[0][0][i]['name'] in common_sets[0]:
-            common_data[0].append(data[0][0][i])
+    for tweet in data[0][0]:
+        if tweet['name'] in common_sets[0]:
+            common_data[0].append(tweet)
 
-    for i in range(0, len(data[0][1])):
-        if data[0][1][i]['name'] in common_sets[1]:
-            common_data[1].append(data[0][1][i])
+    for tweet in data[0][1]:
+        if tweet['name'] in common_sets[1]:
+            common_data[1].append(tweet)
 
 
     return common_data
@@ -179,11 +177,11 @@ def get_text_data(data_list):
 
     text_data = []
 
-    for i in range(0, len(data_list)):
+    for item in data_list:
 
-        text_data.append({'status_text': data_list[i]['text'].replace('\n', '\u000A'),
-                          'screen_names': data_list[i]['entities']['user_mentions'],
-                          'hashtags': data_list[i]['entities']['hashtags']})
+        text_data.append({'status_text': item['text'].replace('\n', '\u000A'),
+                          'screen_names': item['entities']['user_mentions'],
+                          'hashtags': item['entities']['hashtags']})
 
     return text_data
 
