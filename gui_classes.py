@@ -25,6 +25,11 @@ except:
 
 import webbrowser as browser
 
+import io
+
+from PIL import Image, ImageTk
+import urllib.request
+
 class CustomNotebook(ttk.Notebook):
     """A ttk Notebook with close buttons on each tab"""
     notebook_id = 0
@@ -175,6 +180,44 @@ class CustomNotebook(ttk.Notebook):
                 tk.messagebox.showinfo('Error', 'The tab is already closed!')
 
 
+class TweetsNotebook(CustomNotebook):
+
+    def __init__(self, master, text = "", close_button = False, width = 200, height = 200, x = 0, y = 0, *args, **kwargs):
+        self.labelFrame = tk.LabelFrame(master, text = text)
+        self.labelFrame.place(x = x, y = y)
+        self.width, self.height = width, height
+        self.name = text
+        super().__init__(self.labelFrame, close_button = close_button, width = width, height = height, *args, **kwargs)
+        self.update("")
+
+    def update(self, data, **kwargs):
+        self.show_tweet(data, 0)
+
+    def show_tweet(self, data, index):
+        # This should point towards some random example tweet for now.
+        tweet = sc.tweet1_data
+
+        profinfo = tk.LabelFrame(self.labelFrame)
+
+        with urllib.request.urlopen(tweet.get("user").get("profile_image_url_https")) as url:
+            f = io.BytesIO(url.read())
+
+        img = Image.open(f)
+        photo = ImageTk.PhotoImage(img)
+
+        image = tk.Label(profinfo, image=photo)
+        image.image = photo # keep a reference!
+        image.pack(side = "left")
+
+        tk.Label(profinfo, text = tweet.get("user").get("name")).pack(side = "top")
+        tk.Label(profinfo, text = "@" + tweet.get("user").get("screen_name")).pack()
+
+        profinfo.pack(fill = 'x', side = "top")
+
+        tk.Label(self.labelFrame, text = tweet.get("text"), wraplength = AnalysisTab.tweetWidth, justify = "left").pack(side = "top")
+
+
+
 class FramedNotebook(CustomNotebook):
 
     def __init__(self, master, text = "", close_button = False, width = 200, height = 200, x = 0, y = 0, *args, **kwargs):
@@ -194,7 +237,7 @@ class FramedNotebook(CustomNotebook):
         if isCommon:
             if self.tree:
                 self.tree.delete(*self.tree.get_children())
-                populateTreeview(data, self.tree)
+                FramedNotebook.populateTreeview(data, self.tree)
             else:
                 for child in self.labelFrame.winfo_children():
                     child.destroy()
@@ -220,10 +263,7 @@ class FramedNotebook(CustomNotebook):
                 self.createTreeview(tab.frame, data[4])
 
     def createTreeview(self, frame, data):
-        if(frame.winfo_reqwidth() > 1):
-            width = frame.winfo_reqwidth()
-        else:
-            width = frame.winfo_width()
+        width = frame.winfo_reqwidth() if frame.winfo_reqwidth() > 1 else frame.winfo_width()
         fields = ['name', 'tweet_volume', 'url']
         self.tree = ttk.Treeview(columns=fields, displaycolumns=fields[:2], show=[])
         self.tree.grid(column=0, row=0, sticky='nsew', in_=frame)
@@ -233,22 +273,24 @@ class FramedNotebook(CustomNotebook):
         self.tree.column('name', width=int(width*0.75))
         self.tree.column('tweet_volume', width=int(width*0.23))
 
-        self.tree.bind('<Double-Button-1>', lambda event : openLink(event.widget, fields))
+        self.tree.bind('<Double-Button-1>', lambda event : FramedNotebook.openLink(event.widget, fields))
 
-        populateTreeview(data, self.tree)
+        FramedNotebook.populateTreeview(data, self.tree)
 
-# Opens the browser page of the clicked item in a treeview.
-# w here refers to the widget of the event, which here is the treeview element.
-def openLink(w, fields):
-    values = w.item(w.selection()[0], values=None)
-    # The values are converted to a dictionary to automatically locate the url.
-    valuesdict = dict(zip(fields, values))
-    browser.open(valuesdict['url'])
+    # Opens the browser page of the clicked item in a treeview.
+    # w here refers to the widget of the event, which here is the treeview element.
+    @staticmethod
+    def openLink(w, fields):
+        values = w.item(w.selection()[0], values=None)
+        # The values are converted to a dictionary to automatically locate the url.
+        valuesdict = dict(zip(fields, values))
+        browser.open(valuesdict['url'])
 
-def populateTreeview(data, treeview):
-    for entry in data:
-        values = entry['name'], entry['tweet_volume'] or 'No data', entry['url']
-        treeview.insert('', 'end', values=values)
+    @staticmethod
+    def populateTreeview(data, treeview):
+        for entry in data:
+            values = entry['name'], entry['tweet_volume'] or 'No data', entry['url']
+            treeview.insert('', 'end', values=values)
 
 class Entrybox:
 
@@ -389,6 +431,7 @@ class AnalysisTab(Tab):
     yoffset, linespaceing = 10, 25
     hashtagWidth, hashtagHeight = 250, 230
     keywordWidth, keywordHeight = 250, 230
+    tweetWidth, tweetHeight = 300, 0
 
     def __init__(self, notebook, data):
         AnalysisTab.number_of_tabs += 1
@@ -446,6 +489,10 @@ class AnalysisTab(Tab):
         self.chosenCountries = Entrybox(self.frame, self.hashtags, self.keywords, self.common_hashtags, self.common_keywords,
                                         x = 450, y = self.yoffset, text = "Selected countries",
                                         )
+
+        self.tweets_box = TweetsNotebook(self.frame, text = "Example tweets", x = self.xoffset + 600, y = self.yoffset + self.linespaceing*7,
+                                         width = AnalysisTab.tweetWidth, height = AnalysisTab.tweetHeight, abbreviate = True)
+        self.tweets_box.pack()
 
 
 
