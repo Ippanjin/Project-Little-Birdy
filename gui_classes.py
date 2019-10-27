@@ -180,41 +180,72 @@ class CustomNotebook(ttk.Notebook):
                 tk.messagebox.showinfo('Error', 'The tab is already closed!')
 
 
-class TweetsNotebook(CustomNotebook):
+class TweetsDisplay():
 
     def __init__(self, master, text = "", close_button = False, width = 200, height = 200, x = 0, y = 0, *args, **kwargs):
-        self.labelFrame = tk.LabelFrame(master, text = text)
+        self.labelFrame = tk.LabelFrame(master, text = text, width = width, height = height)
         self.labelFrame.place(x = x, y = y)
         self.width, self.height = width, height
         self.name = text
-        super().__init__(self.labelFrame, close_button = close_button, width = width, height = height, *args, **kwargs)
         self.update("")
 
     def update(self, data, **kwargs):
         self.show_tweet(data, 0)
 
-    def show_tweet(self, data, index):
+    def show_tweet(self, data, index, bg = "white"):
         # This should point towards some random example tweet for now.
         tweet = sc.tweet1_data
 
-        profinfo = tk.LabelFrame(self.labelFrame)
-
+        # Getting the profile pic.
         with urllib.request.urlopen(tweet.get("user").get("profile_image_url_https")) as url:
-            f = io.BytesIO(url.read())
+            profile_image_file = io.BytesIO(url.read())
+        profile_image_open = Image.open(profile_image_file)
+        profile_image = ImageTk.PhotoImage(profile_image_open)
 
-        img = Image.open(f)
-        photo = ImageTk.PhotoImage(img)
+        # This label holds everything in the tweet.
+        tweet_label = tk.Label(self.labelFrame, bg = bg)
 
-        image = tk.Label(profinfo, image=photo)
-        image.image = photo # keep a reference!
-        image.pack(side = "left")
+        # The pofile pic to the left - and nothing under it.
+        left_label = tk.Label(tweet_label, bg = bg)
+        img_label = tk.Label(left_label, image=profile_image)
+        img_label.image = profile_image
+        img_label.pack(side = "top")
+        left_label.pack(side = "left", fill = 'y')
 
-        tk.Label(profinfo, text = tweet.get("user").get("name")).pack(side = "top")
-        tk.Label(profinfo, text = "@" + tweet.get("user").get("screen_name")).pack()
+        # Display name, along with verified etc.
+        name_label = tk.Label(tweet_label, bg = bg)
+        tk.Label(name_label, text = tweet.get("user").get("name"), font = 'bold', bg = bg).pack(side = "left")
+        if tweet.get("user").get("verified"):
+            verified_image_open = Image.open("images/verified.png").resize((15, 15), Image.ANTIALIAS)
+            verified_image = ImageTk.PhotoImage(verified_image_open)
+            verified_image_label = tk.Label(name_label, image = verified_image, bg = bg)
+            verified_image_label.image = verified_image
+            verified_image_label.pack(side = "left")
+        tk.Label(name_label, text = "@" + tweet.get("user").get("screen_name"), fg = 'grey35', bg = bg).pack(side = "left")
+        name_label.pack(side = "top", fill = 'x')
 
-        profinfo.pack(fill = 'x', side = "top")
+        # The tweet text label.
+        tk.Label(tweet_label, text = tweet.get("text"), wraplength = self.labelFrame["width"] - left_label["width"], justify = "left", bg = bg).pack(side = "top", fill = 'x')
 
-        tk.Label(self.labelFrame, text = tweet.get("text"), wraplength = AnalysisTab.tweetWidth, justify = "left").pack(side = "top")
+        # The retweet and favorite count.
+        stats_bar = tk.Label(tweet_label, bg = bg)
+        retweet_image_open = Image.open("images/retweet.jpg").resize((30, 30), Image.ANTIALIAS)
+        retweet_image = ImageTk.PhotoImage(retweet_image_open)
+        retweet_image_label = tk.Label(stats_bar, image = retweet_image, bg = bg)
+        retweet_image_label.image = retweet_image
+        retweet_image_label.pack(side = "left")
+        tk.Label(stats_bar, text = tweet.get("retweet_count"), bg = bg).pack(side = "left")
+        tk.Label(stats_bar, text = "     ", bg = bg).pack(side = "left")
+        like_image_open = Image.open("images/like.png").resize((30, 30), Image.ANTIALIAS)
+        like_image = ImageTk.PhotoImage(like_image_open)
+        like_image_label = tk.Label(stats_bar, image = like_image, bg = bg)
+        like_image_label.image = like_image
+        like_image_label.pack(side = "left")
+        tk.Label(stats_bar, text = tweet.get("favorite_count"), bg = bg).pack(side = "left")
+        stats_bar.pack(side = "top", fill = 'x')
+
+        tweet_label.pack(side = "top")
+
 
 
 
@@ -263,7 +294,7 @@ class FramedNotebook(CustomNotebook):
                 self.createTreeview(tab.frame, data[4])
 
     def createTreeview(self, frame, data):
-        width = frame.winfo_reqwidth() if frame.winfo_reqwidth() > 1 else frame.winfo_width()
+        width = self.width
         fields = ['name', 'tweet_volume', 'url']
         self.tree = ttk.Treeview(columns=fields, displaycolumns=fields[:2], show=[])
         self.tree.grid(column=0, row=0, sticky='nsew', in_=frame)
@@ -490,9 +521,8 @@ class AnalysisTab(Tab):
                                         x = 450, y = self.yoffset, text = "Selected countries",
                                         )
 
-        self.tweets_box = TweetsNotebook(self.frame, text = "Example tweets", x = self.xoffset + 600, y = self.yoffset + self.linespaceing*7,
+        self.tweets_box = TweetsDisplay(self.frame, text = "Example tweets", x = self.xoffset + 600, y = self.yoffset + self.linespaceing*7,
                                          width = AnalysisTab.tweetWidth, height = AnalysisTab.tweetHeight, abbreviate = True)
-        self.tweets_box.pack()
 
 
 
