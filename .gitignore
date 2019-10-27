@@ -1,12 +1,9 @@
 bin/
 build/
 include/
-lib/
 __pycache__/
 *.swp
 *.spec
 *.exe
 LICENSE.txt
 Scripts/
-tcl/
-pynsist_pkgs/
