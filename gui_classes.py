@@ -209,6 +209,7 @@ class TweetsDisplay():
         left_label = tk.Label(tweet_label, bg = bg)
         img_label = tk.Label(left_label, image=profile_image)
         img_label.image = profile_image
+        img_label.bind('<Double-Button-1>', lambda event : browser.open("https://twitter.com/{}".format(tweet.get("user").get("screen_name"))))
         img_label.pack(side = "top")
         left_label.pack(side = "left", fill = 'y')
 
@@ -234,14 +235,18 @@ class TweetsDisplay():
         retweet_image_label = tk.Label(stats_bar, image = retweet_image, bg = bg)
         retweet_image_label.image = retweet_image
         retweet_image_label.pack(side = "left")
-        tk.Label(stats_bar, text = tweet.get("retweet_count"), bg = bg).pack(side = "left")
-        tk.Label(stats_bar, text = "     ", bg = bg).pack(side = "left")
+        tk.Label(stats_bar, text = "{}     ".format(tweet.get("retweet_count")), bg = bg).pack(side = "left")
         like_image_open = Image.open("images/like.png").resize((30, 30), Image.ANTIALIAS)
         like_image = ImageTk.PhotoImage(like_image_open)
         like_image_label = tk.Label(stats_bar, image = like_image, bg = bg)
         like_image_label.image = like_image
         like_image_label.pack(side = "left")
-        tk.Label(stats_bar, text = tweet.get("favorite_count"), bg = bg).pack(side = "left")
+        tk.Label(stats_bar, text = "{}     ".format(tweet.get("favorite_count")), bg = bg).pack(side = "left")
+        open_tweet_image_open = Image.open("images/link-new-tab.png").resize((20, 20), Image.ANTIALIAS)
+        open_tweet_image = ImageTk.PhotoImage(open_tweet_image_open)
+        open_tweet_image_label = tk.Button(stats_bar, image = open_tweet_image, command = lambda : browser.open("https://twitter.com/{}/status/{}".format(tweet.get("user").get("screen_name"), tweet.get("id"))), bg = bg)
+        open_tweet_image_label.image = open_tweet_image
+        open_tweet_image_label.pack(side = "left")
         stats_bar.pack(side = "top", fill = 'x')
 
         tweet_label.pack(side = "top")
