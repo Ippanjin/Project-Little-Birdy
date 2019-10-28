@@ -43,6 +43,12 @@ def nonesorter(a):
     return a or 0
 
 
+def get_preview_tweets(query, count):
+    auth = twitter.oauth.OAuth(OAUTH_TOKEN, OAUTH_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
+    twitter_api = twitter.Twitter(auth=auth)
+    return twitter_api.search.tweets(q = query, count = count)["statuses"]
+
+
 def prepare_data(entries):
     woeids = []
     for entry in entries:

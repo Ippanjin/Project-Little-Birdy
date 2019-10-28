@@ -17,6 +17,8 @@ import server_code as sc
 
 import numbers
 
+import re
+
 try:
     import os
     os.chdir("D:\(PC)\Desktop\Coding\Python\Twitter prototype\github\Twitter-prototype")
@@ -29,6 +31,11 @@ import io
 
 from PIL import Image, ImageTk
 import urllib.request
+
+# Tkinter label text can only handle unicode in this range, so the rest needs to be replaced.
+def filter_unicode(text):
+    pattern = re.compile(u'[^\u0000-\uFFFF]', re.UNICODE)
+    return pattern.sub(u'\uFFFD', text)
 
 class CustomNotebook(ttk.Notebook):
     """A ttk Notebook with close buttons on each tab"""
@@ -187,60 +194,48 @@ class TweetsDisplay():
         self.labelFrame.place(x = x, y = y)
         self.width, self.height = width, height
         self.name = text
-        self.update("")
+        self.capacity = 3
 
     def update(self, data, **kwargs):
-        self.show_tweet(data, 0)
+        for child in self.labelFrame.winfo_children():
+            child.destroy()
+        for tweet in data:
+            self.show_tweet(tweet)
 
-    def show_tweet(self, data, index, bg = "white"):
-        # This should point towards some random example tweet for now.
-        tweet = sc.tweet1_data
+    def show_tweet(self, tweet, bg = "white"):
 
-        # Getting the profile pic.
+        # Getting the profile pic url.
         with urllib.request.urlopen(tweet.get("user").get("profile_image_url_https")) as url:
             profile_image_file = io.BytesIO(url.read())
-        profile_image_open = Image.open(profile_image_file)
-        profile_image = ImageTk.PhotoImage(profile_image_open)
 
         # This label holds everything in the tweet.
         tweet_label = tk.Label(self.labelFrame, bg = bg)
 
         # The pofile pic to the left - and nothing under it.
         left_label = tk.Label(tweet_label, bg = bg)
-        img_label = tk.Label(left_label, image=profile_image)
-        img_label.image = profile_image
-        img_label.bind('<Double-Button-1>', lambda event : browser.open("https://twitter.com/{}".format(tweet.get("user").get("screen_name"))))
-        img_label.pack(side = "top")
+        profile_image = TweetsDisplay.create_image_label(left_label, profile_image_file)
+        profile_image.pack(side = "top")
         left_label.pack(side = "left", fill = 'y')
 
         # Display name, along with verified etc.
         name_label = tk.Label(tweet_label, bg = bg)
-        tk.Label(name_label, text = tweet.get("user").get("name"), font = 'bold', bg = bg).pack(side = "left")
+        tk.Label(name_label, text = filter_unicode(tweet.get("user").get("name")), font = 'bold', bg = bg).pack(side = "left")
         if tweet.get("user").get("verified"):
-            verified_image_open = Image.open("images/verified.png").resize((15, 15), Image.ANTIALIAS)
-            verified_image = ImageTk.PhotoImage(verified_image_open)
-            verified_image_label = tk.Label(name_label, image = verified_image, bg = bg)
-            verified_image_label.image = verified_image
-            verified_image_label.pack(side = "left")
+            verified_image = TweetsDisplay.create_image_label(name_label, "images/verified.png", (15, 15))
+            verified_image.pack(side = "left")
         tk.Label(name_label, text = "@" + tweet.get("user").get("screen_name"), fg = 'grey35', bg = bg).pack(side = "left")
         name_label.pack(side = "top", fill = 'x')
 
         # The tweet text label.
-        tk.Label(tweet_label, text = tweet.get("text"), wraplength = self.labelFrame["width"] - left_label["width"], justify = "left", bg = bg).pack(side = "top", fill = 'x')
+        tk.Label(tweet_label, text = filter_unicode(tweet.get("text")), wraplength = self.labelFrame["width"] - left_label["width"] - 25, justify = "left", bg = bg).pack(side = "top", fill = 'x')
 
         # The retweet and favorite count.
         stats_bar = tk.Label(tweet_label, bg = bg)
-        retweet_image_open = Image.open("images/retweet.jpg").resize((30, 30), Image.ANTIALIAS)
-        retweet_image = ImageTk.PhotoImage(retweet_image_open)
-        retweet_image_label = tk.Label(stats_bar, image = retweet_image, bg = bg)
-        retweet_image_label.image = retweet_image
-        retweet_image_label.pack(side = "left")
+        retweet_image = TweetsDisplay.create_image_label(stats_bar, "images/retweet.jpg", (30, 30))
+        retweet_image.pack(side = "left")
         tk.Label(stats_bar, text = "{}     ".format(tweet.get("retweet_count")), bg = bg).pack(side = "left")
-        like_image_open = Image.open("images/like.png").resize((30, 30), Image.ANTIALIAS)
-        like_image = ImageTk.PhotoImage(like_image_open)
-        like_image_label = tk.Label(stats_bar, image = like_image, bg = bg)
-        like_image_label.image = like_image
-        like_image_label.pack(side = "left")
+        like_image = TweetsDisplay.create_image_label(stats_bar, "images/like.png", (30, 30))
+        like_image.pack(side = "left")
         tk.Label(stats_bar, text = "{}     ".format(tweet.get("favorite_count")), bg = bg).pack(side = "left")
         open_tweet_image_open = Image.open("images/link-new-tab.png").resize((20, 20), Image.ANTIALIAS)
         open_tweet_image = ImageTk.PhotoImage(open_tweet_image_open)
@@ -249,7 +244,23 @@ class TweetsDisplay():
         open_tweet_image_label.pack(side = "left")
         stats_bar.pack(side = "top", fill = 'x')
 
-        tweet_label.pack(side = "top")
+        tweet_label.pack(side = "top", fill = 'x')
+
+    def on_selection_change(self, w, fields):
+        values = w.item(w.selection()[0], values=None)
+        # The values are converted to a dictionary to automatically locate the name.
+        valuesdict = dict(zip(fields, values))
+        self.update(sc.get_preview_tweets(valuesdict["name"], self.capacity))
+
+    @staticmethod
+    def create_image_label(master, location, size = None, bg = "white"):
+        image_open = Image.open(location)
+        if size:
+            image_open = image_open.resize(size, Image.ANTIALIAS)
+        image = ImageTk.PhotoImage(image_open)
+        image_label = tk.Label(master, image = image, bg = bg)
+        image_label.image = image
+        return image_label
 
 
 
@@ -261,6 +272,7 @@ class FramedNotebook(CustomNotebook):
         self.labelFrame.place(x = x, y = y)
         self.width, self.height = width, height
         self.name = text
+        self.tweets_box = kwargs.pop("tweets_box")
         super().__init__(self.labelFrame, close_button = close_button, width = width, height = height, *args, **kwargs)
         self.printed = []
         self.tabies = []
@@ -310,6 +322,7 @@ class FramedNotebook(CustomNotebook):
         self.tree.column('tweet_volume', width=int(width*0.23))
 
         self.tree.bind('<Double-Button-1>', lambda event : FramedNotebook.openLink(event.widget, fields))
+        self.tree.bind('<<TreeviewSelect>>', lambda event : self.tweets_box.on_selection_change(event.widget, fields))
 
         FramedNotebook.populateTreeview(data, self.tree)
 
@@ -498,36 +511,36 @@ class AnalysisTab(Tab):
 
 
 
+        self.tweets_box = TweetsDisplay(self.frame, text = "Tweets preview", x = self.xoffset + 600, y = self.yoffset + self.linespaceing*7,
+                                         width = AnalysisTab.tweetWidth, height = AnalysisTab.tweetHeight)
+
         self.hashtags = FramedNotebook(self.frame, text = "Trending hashtags",
                                       x = self.xoffset, y = self.yoffset + self.linespaceing*2,
                                       width = AnalysisTab.hashtagWidth, height = AnalysisTab.hashtagHeight,
-                                      abbreviate = True)
+                                      abbreviate = True, tweets_box = self.tweets_box)
         self.hashtags.pack()
 
         self.keywords = FramedNotebook(self.frame, text = "Trending keywords",
                                       x = self.xoffset, y = self.yoffset + AnalysisTab.hashtagHeight+ self.linespaceing*4,
                                       width = AnalysisTab.keywordWidth, height = AnalysisTab.keywordHeight,
-                                      abbreviate = True)
+                                      abbreviate = True, tweets_box = self.tweets_box)
         self.keywords.pack()
 
         self.common_hashtags = FramedNotebook(self.frame, text = "Intersecting hashtags",
                                       x = self.xoffset + 300, y = self.yoffset + self.linespaceing*2,
                                       width = AnalysisTab.hashtagWidth, height = AnalysisTab.hashtagHeight,
-                                      abbreviate = True)
+                                      abbreviate = True, tweets_box = self.tweets_box)
         self.common_hashtags.pack()
 
         self.common_keywords = FramedNotebook(self.frame, text = "Intersecting keywords",
                                       x = self.xoffset + 300, y = self.yoffset + AnalysisTab.hashtagHeight+ self.linespaceing*4,
                                       width = AnalysisTab.keywordWidth, height = AnalysisTab.keywordHeight,
-                                      abbreviate = True)
+                                      abbreviate = True, tweets_box = self.tweets_box)
         self.common_keywords.pack()
 
         self.chosenCountries = Entrybox(self.frame, self.hashtags, self.keywords, self.common_hashtags, self.common_keywords,
                                         x = 450, y = self.yoffset, text = "Selected countries",
                                         )
-
-        self.tweets_box = TweetsDisplay(self.frame, text = "Example tweets", x = self.xoffset + 600, y = self.yoffset + self.linespaceing*7,
-                                         width = AnalysisTab.tweetWidth, height = AnalysisTab.tweetHeight, abbreviate = True)
 
 
 
