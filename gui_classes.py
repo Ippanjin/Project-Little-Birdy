@@ -200,11 +200,13 @@ class TweetsDisplay():
         self.label = tk.Label(self.labelFrame, width = width, height = height, bg = TweetsDisplay.bg)
         self.label.pack_propagate(False)
         self.label.pack()
+        self.preview_on_click = False
+        self.lastkey = "#twitter"
 
-    def update(self, data, **kwargs):
+    def update(self, **kwargs):
         for child in self.label.winfo_children():
             child.destroy()
-        for tweet in data:
+        for tweet in sc.get_preview_tweets(self.lastkey, self.capacity):
             self.show_tweet(tweet)
 
     def show_tweet(self, tweet):
@@ -256,7 +258,9 @@ class TweetsDisplay():
         values = w.item(w.selection()[0], values=None)
         # The values are converted to a dictionary to automatically locate the name.
         valuesdict = dict(zip(fields, values))
-        self.update(sc.get_preview_tweets(valuesdict["name"], self.capacity))
+        self.lastkey = valuesdict["name"]
+        if self.preview_on_click:
+            self.update()
 
     @staticmethod
     def create_image_label(master, location, size = None):
@@ -486,7 +490,7 @@ class AnalysisTab(Tab):
     yoffset, linespaceing = 10, 25
     hashtagWidth, hashtagHeight = 250, 230
     keywordWidth, keywordHeight = 250, 230
-    tweetWidth, tweetHeight = 320, 410
+    tweetWidth, tweetHeight = 320, 380
 
     def __init__(self, notebook, data):
         AnalysisTab.number_of_tabs += 1
@@ -517,8 +521,14 @@ class AnalysisTab(Tab):
 
 
 
-        self.tweets_box = TweetsDisplay(self.frame, text = "Tweets preview", x = self.xoffset + 600, y = self.yoffset + self.linespaceing*7,
-                                         width = AnalysisTab.tweetWidth, height = AnalysisTab.tweetHeight)
+        self.tweets_box = TweetsDisplay(self.frame, text = "Tweets preview", x = self.xoffset + 600, y = self.yoffset + self.linespaceing*8.5, width = AnalysisTab.tweetWidth, height = AnalysisTab.tweetHeight)
+
+        self.update_tweets_label = tk.Label(self.frame)
+        self.update_tweets_button = tk.Button(self.update_tweets_label, text = "Update preview", command = self.tweets_box.update)
+        self.update_tweets_button.pack(side = "left")
+        self.info_button = tk.Button(self.update_tweets_label, text = "info", command = lambda : print("help infor"))
+        self.info_button.pack(side = "right")
+        self.update_tweets_label.place(x = self.xoffset + 600, y = self.yoffset + self.linespaceing*7, width = AnalysisTab.tweetWidth)
 
         self.hashtags = FramedNotebook(self.frame, text = "Trending hashtags",
                                       x = self.xoffset, y = self.yoffset + self.linespaceing*2,
