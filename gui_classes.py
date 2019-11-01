@@ -221,7 +221,7 @@ class TweetsDisplay():
 
         # The pofile pic to the left - and nothing under it.
         left_label = tk.Label(tweet_label, bg = TweetsDisplay.bg)
-        profile_image = TweetsDisplay.create_image_label(left_label, profile_image_file)
+        profile_image = create_image_label(left_label, profile_image_file)
         profile_image.bind('<Double-Button-1>', lambda event : browser.open("https://twitter.com/{}".format(tweet.get("user").get("screen_name"))))
         profile_image.pack(side = "top")
         left_label.pack(side = "left", fill = 'y')
@@ -230,7 +230,7 @@ class TweetsDisplay():
         name_label = tk.Label(tweet_label, bg = TweetsDisplay.bg)
         tk.Label(name_label, text = filter_unicode(tweet.get("user").get("name")), font = 'bold', bg = TweetsDisplay.bg).pack(side = "left")
         if tweet.get("user").get("verified"):
-            verified_image = TweetsDisplay.create_image_label(name_label, "images/verified.png", (15, 15))
+            verified_image = create_image_label(name_label, "images/verified.png", (15, 15))
             verified_image.pack(side = "left")
         tk.Label(name_label, text = "@" + tweet.get("user").get("screen_name"), fg = 'grey35', bg = TweetsDisplay.bg).pack(side = "left")
         name_label.pack(side = "top", fill = 'x')
@@ -240,17 +240,15 @@ class TweetsDisplay():
 
         # The retweet and favorite count.
         stats_bar = tk.Label(tweet_label, bg = TweetsDisplay.bg)
-        retweet_image = TweetsDisplay.create_image_label(stats_bar, "images/retweet.jpg", (30, 30))
+        retweet_image = create_image_label(stats_bar, "images/retweet.jpg", (30, 30))
         retweet_image.pack(side = "left")
         tk.Label(stats_bar, text = "{}     ".format(tweet.get("retweet_count")), bg = TweetsDisplay.bg).pack(side = "left")
-        like_image = TweetsDisplay.create_image_label(stats_bar, "images/like.png", (30, 30))
+        like_image = create_image_label(stats_bar, "images/like.png", (30, 30))
         like_image.pack(side = "left")
         tk.Label(stats_bar, text = "{}     ".format(tweet.get("favorite_count")), bg = TweetsDisplay.bg).pack(side = "left")
-        open_tweet_image_open = Image.open("images/link-new-tab.png").resize((20, 20), Image.ANTIALIAS)
-        open_tweet_image = ImageTk.PhotoImage(open_tweet_image_open)
-        open_tweet_image_label = tk.Button(stats_bar, image = open_tweet_image, command = lambda : browser.open("https://twitter.com/{}/status/{}".format(tweet.get("user").get("screen_name"), tweet.get("id"))), bg = TweetsDisplay.bg)
-        open_tweet_image_label.image = open_tweet_image
-        open_tweet_image_label.pack(side = "left")
+        open_tweet_image = create_image_label(stats_bar, "images/link-new-tab.png", (20, 20), widget = tk.Button)
+        open_tweet_image.configure(command = lambda : browser.open("https://twitter.com/{}/status/{}".format(tweet.get("user").get("screen_name"), tweet.get("id"))))
+        open_tweet_image.pack(side = "left")
         stats_bar.pack(side = "top", fill = 'x')
 
         tweet_label.pack(side = "top", fill = 'x')
@@ -266,16 +264,6 @@ class TweetsDisplay():
     def on_enter_press(self):
         if self.preview_on_enter_press:
             self.update()
-
-    @staticmethod
-    def create_image_label(master, location, size = None):
-        image_open = Image.open(location)
-        if size:
-            image_open = image_open.resize(size, Image.ANTIALIAS)
-        image = ImageTk.PhotoImage(image_open)
-        image_label = tk.Label(master, image = image, bg = TweetsDisplay.bg)
-        image_label.image = image
-        return image_label
 
 
 
@@ -526,14 +514,31 @@ class AnalysisTab(Tab):
 
 
 
+        # Preview tweets box.
         self.tweets_box = TweetsDisplay(self.frame, text = "Tweets preview", x = self.xoffset + 600, y = self.yoffset + self.linespaceing*8.5, width = AnalysisTab.tweetWidth, height = AnalysisTab.tweetHeight)
 
+        # The update and info box for preview tweets.
         self.update_tweets_label = tk.Label(self.frame)
         self.update_tweets_button = tk.Button(self.update_tweets_label, text = "Update preview", command = self.tweets_box.update)
         self.update_tweets_button.pack(side = "left")
-        self.info_button = tk.Button(self.update_tweets_label, text = "info", command = lambda : print("help infor"))
+        self.info_button = create_image_label(self.update_tweets_label, "images/question-mark.png", size = (30, 30), widget = tk.Button, bg = None)
+        self.info_button.configure(border = "0", command = lambda: tk.messagebox.showinfo(
+            "Preview tweets", "Double click on pic: Opens profile in browser.\n\n"
+            "Click on the arrow button: Opens the original tweet in browser.\n\n"
+            "To update:\n- Click the update button.\n- Press enter ({0}**).\n\n"
+            "Auto-update on item* selection is {1}**.\n\n"
+            "For more items, double click the item* to open in browser.\n\n"
+            "* \"item\" refers to hashtag or keyword.\n\n"
+            "** Can toggle in settings."
+            .format(
+                "enabled" if self.tweets_box.preview_on_enter_press else "disabled",
+                "enabled" if self.tweets_box.preview_on_click else "disabled"
+            )
+        ))
         self.info_button.pack(side = "right")
         self.update_tweets_label.place(x = self.xoffset + 600, y = self.yoffset + self.linespaceing*7, width = AnalysisTab.tweetWidth)
+
+
 
         self.hashtags = FramedNotebook(self.frame, text = "Trending hashtags",
                                       x = self.xoffset, y = self.yoffset + self.linespaceing*2,
@@ -675,5 +680,14 @@ class AdvancedTab(Tab):
 
         except:
             resultLabel.config(text = "Connection status: connection failure...")
+
+def create_image_label(master, location, size = None, bg = TweetsDisplay.bg, widget = tk.Label):
+    image_open = Image.open(location)
+    if size:
+        image_open = image_open.resize(size, Image.ANTIALIAS)
+    image = ImageTk.PhotoImage(image_open)
+    image_label = widget(master, image = image, bg = bg)
+    image_label.image = image
+    return image_label
 
 
