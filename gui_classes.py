@@ -201,6 +201,7 @@ class TweetsDisplay():
         self.label.pack_propagate(False)
         self.label.pack()
         self.preview_on_click = False
+        self.preview_on_enter_press = True
         self.lastkey = "#twitter"
 
     def update(self, **kwargs):
@@ -260,6 +261,10 @@ class TweetsDisplay():
         valuesdict = dict(zip(fields, values))
         self.lastkey = valuesdict["name"]
         if self.preview_on_click:
+            self.update()
+
+    def on_enter_press(self):
+        if self.preview_on_enter_press:
             self.update()
 
     @staticmethod

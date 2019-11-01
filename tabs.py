@@ -92,6 +92,8 @@ def main():
 
     notebook = gc.CustomNotebook(root,  close_button = True)
     notebook.pack(side="top", fill="both", expand=True)
+    # Update the preview tweets in the active tab when enter is pressed - can be disabled.
+    root.bind("<Return>", lambda event: notebook.tabs[notebook.index(notebook.select())].tweets_box.on_enter_press())
     """
     test_tab = gc.Tab(notebook, "Test")
     test_tab2 = gc.Tab(notebook, "Test2")
