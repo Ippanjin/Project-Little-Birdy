@@ -1,9 +1,7 @@
 bin/
 build/
-include/
 __pycache__/
 *.swp
 *.spec
 *.exe
-LICENSE.txt
-Scripts/
+venv/
