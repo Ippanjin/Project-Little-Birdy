@@ -112,7 +112,10 @@ def main():
     """
 
 
-    root.mainloop()
+    from server_code import track_tweets
+    while True:
+        root.update()
+        track_tweets()
 
 if __name__ == '__main__':
     main()
