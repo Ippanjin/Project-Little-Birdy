@@ -15,7 +15,6 @@ from urllib.parse import unquote
 from woeid import alphSorted_woeid_list as woeid_data
 import copy
 import webbrowser as browser
-from time import time as time_now
 
 init_data = {
 'CONSUMER_KEY':'OmSLZHzlAonPshptklKq40PXu',
@@ -287,37 +286,6 @@ for i in range(0, len(hashtag_text_data)):
         continue
     print()
 """
-
-tracked_tweets = []
-
-def track_tweets():
-    auth = twitter.oauth.OAuth(OAUTH_TOKEN, OAUTH_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
-    twitter_api = twitter.Twitter(auth=auth)
-    for tweet in tracked_tweets:
-        if time_now() - tweet["last_updated"] >= tweet["update_every"]:
-            update_retweets(tweet)
-
-def add_tweet_for_tracking(tweet_id, update_every = 5):
-    tweet = {}
-    tweet["id"] = tweet_id
-    tweet["retweets"] = twitter_api.statuses.retweets(_id = tweet_id)
-    tweet["object"] = tweet_api.statuses.show(_id = _id)
-    tweet["last_updated"] = time_now()
-    tweet["update_every"] = update_every
-    tracked_tweets.append(tweet)
-
-def update_retweets(tweet):
-    last count = tweet["object"].get("retweet_count")
-    tweet["object"] = tweet_api.statuses.show(_id = tweet["id"])
-    print('New retweets:', tweet["object"].get("retweet_count") - last_count)
-    new_retweets = twitter_api.statuses.retweets(_id = tweet["id"])
-    print('Number of fetched retweets:', len(new_retweets))
-    last_retweet_id = tweet["retweets"][0].get("id")
-    matching_index = 100
-    for i, retweet in enumerate(new_retweets):
-        if retweet.get("id") == last_retweet_id:
-            matching_index = i
-    tweet["retweets"] = new_retweets[:matching_index] + tweet["retweets"]
 
 def main():
     pass
