@@ -46,12 +46,22 @@ def nonesorter(a):
 def get_preview_tweets(query, count):
     auth = twitter.oauth.OAuth(OAUTH_TOKEN, OAUTH_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
     twitter_api = twitter.Twitter(auth=auth)
-    search_results = twitter_api.search.tweets(q = query, count = count)
+    search_results = twitter_api.search.tweets(q = query, count = count, result_type = "popular")
     statuses = search_results['statuses']
     while len(statuses) < count:
         try:
             next_results = search_results['search_metadata']['next_results']
         except KeyError:
+            search_results = twitter_api.search.tweets(q = query, count = count)
+            statuses = search_results['statuses']
+            while len(statuses) < count:
+                try:
+                    next_results = search_results['search_metadata']['next_results']
+                except KeyError:
+                    break
+                kwargs = dict([ kv.split('=') for kv in unquote(next_results[1:]).split("&") ])
+                search_results = twitter_api.search.tweets(**kwargs)
+                statuses += search_results['statuses']
             break
         kwargs = dict([ kv.split('=') for kv in unquote(next_results[1:]).split("&") ])
         search_results = twitter_api.search.tweets(**kwargs)
