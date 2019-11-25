@@ -48,6 +48,7 @@ def get_preview_tweets(query, count):
     twitter_api = twitter.Twitter(auth=auth)
     search_results = twitter_api.search.tweets(q = query, count = count)
     statuses = search_results['statuses']
+    # This count is basical the capacity which is kept to 3 
     while len(statuses) < count:
         try:
             next_results = search_results['search_metadata']['next_results']

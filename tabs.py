@@ -6,18 +6,16 @@ Created on Tue Jul 30 12:39:06 2019
 """
 
 import sys
-try:
-    import os
-    os.chdir("D:\(PC)\Desktop\Coding\Python\Twitter prototype\github\Twitter-prototype")
-except:
-    pass
+# try:
+#     import os
+#     os.chdir("D:\(PC)\Desktop\Coding\Python\Twitter prototype\github\Twitter-prototype")
+# except:
+#     pass
 import twitter
 import json
 from urllib.parse import unquote
 from woeid import alphSorted_woeid_list as woeid_data
 import copy
-
-
 
 import tkinter as tk
 from tkinter import ttk
@@ -54,8 +52,14 @@ def quitProgram(root):
     root.destroy()
     sys.exit()
 
+###########################################
+# Main program,
+############################################
+
+
 
 def main():
+    # Setting up window , with variable as root
     root = tk.Tk()
     root.title(" Twitter Data Analysis")
     root.geometry("1000x700")
@@ -65,8 +69,8 @@ def main():
     root.config(menu=menu)
 
     subMenu = tk.Menu(menu, tearoff=0)
-    menu.add_cascade(label="File", menu=subMenu)
-    subMenu.add_command(label="New Analysis...", command= lambda: gc.AnalysisTab(notebook, woeid_data))
+    menu.add_cascade(label="File", menu=subMenu) # below, we use lambda because its a hacker way around to pass func to command with parameters and ont exceute them instantly.
+    subMenu.add_command(label="New Analysis...", command= lambda: gc.AnalysisTab(notebook, woeid_data))# gc is our defined gui_class as gc. I am calling a function call in command from class gui
     subMenu.add_command(label="Save Analysis as...", command = doNothing)
     subMenu.add_separator()
     subMenu.add_command(label="Exit", command = lambda: quitProgram(root))
@@ -78,17 +82,18 @@ def main():
     # ***** Tool bar ***********
 
     toolbar = tk.Frame(root, bg="grey")
-
-    option1Button = tk.Button(toolbar, text="Option 1", command=doNothing)
-    option1Button.pack(side="left", padx=2, pady=2)
+    # Right now when we click the option button , it does nothing in the main window.
+    option1Button = tk.Button(toolbar, text="Option 1", command=doNothing) # This button is in the frame:toolbar, which is a top frame.
+    option1Button.pack(side="left", padx=2, pady=2) # 2 pt padding with left most placement
     option2Button = tk.Button(toolbar, text="Option 2", command=doNothing)
     option2Button.pack(side="left", padx=2, pady=2)
 
     toolbar.pack(side="top", fill = "x")
 
-    # ***** Status bar ******
+    # ***** Status bar ****** the lowest /bottom most area of window
     statusbar = tk.Label(root, text="Disconnected from server...", bd=1, relief="sunken", anchor="w")
     statusbar.pack(side="bottom", fill="x")
+    # *** end of status bar code ******
 
     notebook = gc.CustomNotebook(root,  close_button = True)
     notebook.pack(side="top", fill="both", expand=True)
