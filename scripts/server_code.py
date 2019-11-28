@@ -14,7 +14,7 @@ import json
 from urllib.parse import unquote
 from woeid import alphSorted_woeid_list as woeid_data
 import copy
-import webbrowser as browser
+
 
 init_data = {
 'CONSUMER_KEY':'OmSLZHzlAonPshptklKq40PXu',
@@ -47,19 +47,36 @@ def nonesorter(a):
 def get_preview_tweets(query, count):
     auth = twitter.oauth.OAuth(OAUTH_TOKEN, OAUTH_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
     twitter_api = twitter.Twitter(auth=auth)
-    # TODO: modify query to exclude retweets.
-    search_results = twitter_api.search.tweets(q = query, count = count, result_type = "recent")
+
+    search_results = twitter_api.search.tweets(q = query, count = count, result_type = "popular")
     statuses = search_results['statuses']
+
     while len(statuses) < count:
         try:
             next_results = search_results['search_metadata']['next_results']
         except KeyError:
+            search_results = twitter_api.search.tweets(q = query, count = count)
+            statuses = search_results['statuses']
+            while len(statuses) < count:
+                try:
+                    next_results = search_results['search_metadata']['next_results']
+                except KeyError:
+                    break
+                kwargs = dict([ kv.split('=') for kv in unquote(next_results[1:]).split("&") ])
+                search_results = twitter_api.search.tweets(**kwargs)
+                statuses += search_results['statuses']
             break
         kwargs = dict([ kv.split('=') for kv in unquote(next_results[1:]).split("&") ])
         search_results = twitter_api.search.tweets(**kwargs)
         statuses += search_results['statuses']
 
-    return statuses if len(statuses) <= 3 else statuses[:3]
+    for i, status in enumerate(statuses):
+        if i >= count:
+            break
+        if status.get("retweeted_status"):
+            statuses[i] = status.get("retweeted_status")
+
+    return statuses if len(statuses) <= count else statuses[:count]
 
 
 def prepare_data(entries):

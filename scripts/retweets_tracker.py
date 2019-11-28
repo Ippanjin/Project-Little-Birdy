@@ -24,7 +24,7 @@ def track_tweets():
             update_retweets_per_hour(tweet)
 
 # Add the given tweet id to the list of tracked tweets.
-def add_tweet_for_tracking(tweet_id, update_every = 30, start_tracking_now = True, if_previously_paused == "resume"):
+def add_tweet_for_tracking(tweet_id, update_every = 30, start_tracking_now = True, if_previously_paused = "resume"):
     for tweet in tracked_tweets:
         if tweet["id"] == tweet_id:
             return
