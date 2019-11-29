@@ -15,6 +15,7 @@ from urllib.parse import unquote
 from woeid import alphSorted_woeid_list as woeid_data
 import copy
 
+
 init_data = {
 'CONSUMER_KEY':'OmSLZHzlAonPshptklKq40PXu',
 'CONSUMER_SECRET': 'FDDapXwQavn1hJjXVNfftqEPqmnh6ppOSyTt4ljfSGOH8IsFt9',
@@ -305,3 +306,9 @@ for i in range(0, len(hashtag_text_data)):
         continue
     print()
 """
+
+def main():
+    pass
+
+if __name__ == "__main__":
+    main()

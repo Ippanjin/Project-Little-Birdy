@@ -22,6 +22,7 @@ from tkinter import ttk
 from tkinter import messagebox
 
 import gui_classes as gc
+from retweets_tracker import track_tweets
 
 data = [['Consumer key: ', 'OmSLZHzlAonPshptklKq40PXu'],
         ['Consumer secret: ', 'FDDapXwQavn1hJjXVNfftqEPqmnh6ppOSyTt4ljfSGOH8IsFt9'],
@@ -117,7 +118,9 @@ def main():
     """
 
 
-    root.mainloop()
+    while True:
+        root.update()
+        track_tweets()
 
 if __name__ == '__main__':
     main()
