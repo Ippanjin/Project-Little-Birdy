@@ -54,9 +54,6 @@ def get_preview_tweets(query, count):
     while len(statuses) < count:
         try:
             next_results = search_results['search_metadata']['next_results']
-    while len(statuses) < count:
-        try:
-            next_results = search_results['search_metadata']['next_results']
         except KeyError:
             search_results = twitter_api.search.tweets(q = query, count = count)
             statuses = search_results['statuses']
