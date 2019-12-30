@@ -15,6 +15,7 @@ from urllib.parse import unquote
 from woeid import alphSorted_woeid_list as woeid_data
 import copy
 
+
 init_data = {
 'CONSUMER_KEY':'OmSLZHzlAonPshptklKq40PXu',
 'CONSUMER_SECRET': 'FDDapXwQavn1hJjXVNfftqEPqmnh6ppOSyTt4ljfSGOH8IsFt9',
@@ -50,9 +51,6 @@ def get_preview_tweets(query, count):
     search_results = twitter_api.search.tweets(q = query, count = count, result_type = "popular")
     statuses = search_results['statuses']
 
-    while len(statuses) < count:
-        try:
-            next_results = search_results['search_metadata']['next_results']
     while len(statuses) < count:
         try:
             next_results = search_results['search_metadata']['next_results']
@@ -305,3 +303,9 @@ for i in range(0, len(hashtag_text_data)):
         continue
     print()
 """
+
+def main():
+    pass
+
+if __name__ == "__main__":
+    main()

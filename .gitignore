@@ -5,3 +5,6 @@ __pycache__/
 *.spec
 *.exe
 venv/
+tags
+.idea/
+scripts/.ipynb_checkpoints

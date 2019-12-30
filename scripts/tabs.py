@@ -6,11 +6,13 @@ Created on Tue Jul 30 12:39:06 2019
 """
 
 import sys
-# try:
-#     import os
-#     os.chdir("D:\(PC)\Desktop\Coding\Python\Twitter prototype\github\Twitter-prototype")
-# except:
-#     pass
+
+try:
+    import os
+    os.chdir("D:\(PC)\Desktop\Coding\Python\Twitter prototype\github\Project-Little-Birdy\scripts")
+except:
+    pass
+
 import twitter
 import json
 from urllib.parse import unquote
@@ -22,6 +24,7 @@ from tkinter import ttk
 from tkinter import messagebox
 
 import gui_classes as gc
+from retweets_tracker import track_tweets
 
 data = [['Consumer key: ', 'OmSLZHzlAonPshptklKq40PXu'],
         ['Consumer secret: ', 'FDDapXwQavn1hJjXVNfftqEPqmnh6ppOSyTt4ljfSGOH8IsFt9'],
@@ -117,7 +120,9 @@ def main():
     """
 
 
-    root.mainloop()
+    while True:
+        root.update()
+        track_tweets()
 
 if __name__ == '__main__':
     main()
